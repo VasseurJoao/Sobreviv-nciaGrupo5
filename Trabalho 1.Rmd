@@ -1,0 +1,12 @@
+---
+title: "Trabalho 1"
+author: "Rafael Hilário"
+date: "27/07/2021"
+output: html_document
+---
+```{r}
+dados <- read.table("http://sobrevida.fiocruz.br/dados/ctinca.dat",
+           header=TRUE)
+dados
+```
+
