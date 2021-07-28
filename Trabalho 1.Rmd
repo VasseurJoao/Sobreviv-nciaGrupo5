@@ -5,9 +5,41 @@ date: "27/07/2021"
 output: html_document
 ---
 ```{r}
+install.packages("survival")
+install.packages("flexsurv")
+library(survival)
+require(flexsurv)
+```
+
+```{r}
 dados <- read.table("http://sobrevida.fiocruz.br/dados/ctinca.dat",
            header=TRUE)
 dados
+dados$idadeclass <- c()
+class(dados$idade)
+i <- 0
+for(i in 1:length(dados$idade)){
+  if(dados$idade[i]<21){
+  dados$idadeclass[i] <- c("16 - 20")
+}
+if(dados$idade[i]>20 && dados$idade[i]<41){
+  dados$idadeclass[i] <- "21 - 40"
+}
+if(dados$idade[i]>40 && dados$idade[i]<61){
+  dados$idadeclass[i] <- "41 - 60"
+}
+if(dados$idade[i]>60){
+  dados$idadeclass[i] <- ">60"
+}
+}
+
+dados$sexo <- as.factor(dados$sexo)
+dados$gptumor <- as.factor(dados$gptumor)
+dados$desnut <- as.factor(dados$desnut)
+dados$comorbi <- as.factor(dados$comorbi)
+dados$leucopenia <- as.factor(dados$leucopenia)
+dados$idadeclass  <- as.factor(dados$idadeclass)
+
 ```
 #Descritiva
 ##Tabela variaveis qualitativas
@@ -28,11 +60,22 @@ summary(dados$tempo)
 ```
 ##Estimativa de Kaplan-Meier
 ```{r}
-install.packages("survival")
-library(survival)
-km.dados <- survfit(Surv(tempo,status)~gptumor,data = dados)
-km.dados
-dados$gptumor
+
+tempo = dados$tempo
+status = dados$status
+tipo = dados$gptumor
+sexo = dados$sexo
+
+
+km.dados = survfit(Surv(tempo, status)~1, data = dados)
+summary(km.dados)
+plot(km.dados, las = 1, col = c(1,2,3))
+
+km.dados.tipo = survfit(Surv(tempo, status)~ sexo , data = dados)
+summary(km.dados.tipo)
+km.dados.tipo
+
+plot(km.dados.tipo, lty = c(1,2,3))
 ```
 
 
@@ -42,3 +85,71 @@ dados$gptumor
 
 
 ##Teste Logrank
+sexo
+```{r}
+lr.dados = survdiff(Surv(tempo, status)~sexo, data = dados)
+lr.dados
+```
+Idade
+```{r}
+lr.dados = survdiff(Surv(tempo, status)~idadeclass, data = dados)
+lr.dados
+```
+Tipo de cancer
+```{r}
+
+lr.dados = survdiff(Surv(tempo, status)~gptumor, data = dados)
+lr.dados
+```
+
+perda de peso
+```{r}
+lr.dados = survdiff(Surv(tempo, status)~desnut, data = dados)
+lr.dados
+```
+
+comorbidade
+```{r}
+lr.dados = survdiff(Surv(tempo, status)~comorbi, data = dados)
+lr.dados
+```
+
+presença de leucopenia
+```{r}
+lr.dados = survdiff(Surv(tempo, status)~leucopenia, data = dados)
+lr.dados
+```
+
+
+
+
+
+##Modelo
+```{r}
+##modelo Exponencial
+exponencial<-survreg(Surv(tempo,status)~1,dist='exponential',data=dados)
+
+##modelo Lognormal
+lognormal<-survreg(Surv(tempo,status)~1,dist='lognorm',data=dados)
+
+##modelo Weibull
+weibull<-survreg(Surv(tempo,status)~1,dist='weibull',data=dados)
+
+```
+```{r}
+time<-km.dados$time
+st<-km.dados$surv
+par(mfrow=c(1,3))
+invst<-qnorm(st)
+plot(time, -log(st),pch=16,xlab="tempos",ylab="-log(S(t))",main = 'Exponencial')
+plot(log(time),log(-log(st)),pch=16,xlab="log(tempos)",ylab="log(-log(S(t)))",main="Weibull")
+plot(log(time),invst, pch=16,xlab="log(tempos)", ylab=expression(Phi^-1 * (S(t))),main="Log-Normal")
+cbind(exponencial$loglik[2],weibull$loglik[2],lognormal$loglik[2])
+```
+```{r}
+ ajust4<-flexsurvreg(Surv(tempo,status)~1,dist='gengamma')
+ ajust4
+ ajust4$loglik
+ 2*(ajust4$loglik-cbind(exponencial$loglik[2],weibull$loglik[2],lognormal$loglik[2]))
+```
+
