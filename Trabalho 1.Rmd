@@ -7,12 +7,17 @@ output: html_document
 ```{r}
 dados <- read.table("http://sobrevida.fiocruz.br/dados/ctinca.dat",
            header=TRUE)
-
+dados
 ```
 #Descritiva
 ##Tabela variaveis qualitativas
 ```{r}
-
+data.frame(table(dados$status))
+data.frame(table(dados$sexo))
+data.frame(table(dados$gptumor))
+data.frame(table(dados$desnut))
+data.frame(table(dados$comorbi))
+data.frame(table(dados$leucopenia))
 ```
 
 
@@ -22,5 +27,18 @@ summary(dados$idade)
 summary(dados$tempo)
 ```
 ##Estimativa de Kaplan-Meier
+```{r}
+install.packages("survival")
+library(survival)
+km.dados <- survfit(Surv(tempo,status)~gptumor,data = dados)
+km.dados
+dados$gptumor
+```
+
+
+
 ##ESTIMADOR DE NELSON-AALEN
+
+
+
 ##Teste Logrank
