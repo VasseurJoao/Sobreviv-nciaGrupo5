@@ -7,6 +7,18 @@ output: html_document
 ```{r}
 dados <- read.table("http://sobrevida.fiocruz.br/dados/ctinca.dat",
            header=TRUE)
-dados
+
+```
+#Descritiva
+##Tabela variaveis qualitativas
+```{r}
+
+```
+
+
+##Variaveis quantitativas
+```{r}
+summary(dados$idade)
+summary(dados$tempo)
 ```
 
