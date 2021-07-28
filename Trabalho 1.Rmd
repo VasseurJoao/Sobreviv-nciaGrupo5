@@ -21,4 +21,6 @@ dados <- read.table("http://sobrevida.fiocruz.br/dados/ctinca.dat",
 summary(dados$idade)
 summary(dados$tempo)
 ```
-
+##Estimativa de Kaplan-Meier
+##ESTIMADOR DE NELSON-AALEN
+##Teste Logrank
