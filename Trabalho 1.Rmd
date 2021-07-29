@@ -31,6 +31,17 @@ if(dados$idade[i]>40 && dados$idade[i]<61){
 if(dados$idade[i]>60){
   dados$idadeclass[i] <- ">60"
 }
+     if(dados$sexo[i]=="Fem"){dados$sexo[i] <- 0}
+  else{dados$sexo[i] <- 1}
+if(dados$gptumor[i]=="Loco"){  dados$gptumor[i] <- 0}
+  if(dados$gptumor[i]=="Mtx"){  dados$gptumor[i] <- 1}
+  else{dados$gptumor[i] <- 2}
+if(dados$desnut[i]=="y"){dados$desnut[i] <- 1}
+  else{dados$desnut[i] <- 0}
+if(dados$comorbi[i]=="y"){dados$comorbi[i] <- 1}
+  else{dados$comorbi[i] <- 0}
+if(dados$leucopenia[i]=="y"){dados$leucopenia[i] <- 1}
+  else{dados$leucopenia[i] <- 0}
 }
 
 dados$sexo <- as.factor(dados$sexo)
@@ -66,16 +77,31 @@ status = dados$status
 tipo = dados$gptumor
 sexo = dados$sexo
 
-
 km.dados = survfit(Surv(tempo, status)~1, data = dados)
 summary(km.dados)
 plot(km.dados, las = 1, col = c(1,2,3))
 
 km.dados.tipo = survfit(Surv(tempo, status)~ sexo , data = dados)
 summary(km.dados.tipo)
-km.dados.tipo
-
 plot(km.dados.tipo, lty = c(1,2,3))
+
+km.dados.tipo = survfit(Surv(tempo, status)~ desnut  , data = dados)
+summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2,3))
+
+km.dados.tipo = survfit(Surv(tempo, status)~ comorbi  , data = dados)
+summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2,3))
+
+
+km.dados.tipo = survfit(Surv(tempo, status)~ leucopenia   , data = dados)
+summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2,3))
+
+km.dados.tipo = survfit(Surv(tempo, status)~ idadeclass  , data = dados)
+summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2,3))
+
 ```
 
 
@@ -130,12 +156,13 @@ lr.dados
 exponencial<-survreg(Surv(tempo,status)~1,dist='exponential',data=dados)
 
 ##modelo Lognormal
-lognormal<-survreg(Surv(tempo,status)~1,dist='lognorm',data=dados)
+lognormal.1<-survreg(Surv(tempo,status)~1,dist='lognorm',data=dados)
 
 ##modelo Weibull
 weibull<-survreg(Surv(tempo,status)~1,dist='weibull',data=dados)
 
 ```
+Escolha do Modelo
 ```{r}
 time<-km.dados$time
 st<-km.dados$surv
@@ -145,11 +172,31 @@ plot(time, -log(st),pch=16,xlab="tempos",ylab="-log(S(t))",main = 'Exponencial')
 plot(log(time),log(-log(st)),pch=16,xlab="log(tempos)",ylab="log(-log(S(t)))",main="Weibull")
 plot(log(time),invst, pch=16,xlab="log(tempos)", ylab=expression(Phi^-1 * (S(t))),main="Log-Normal")
 cbind(exponencial$loglik[2],weibull$loglik[2],lognormal$loglik[2])
+ajust4<-flexsurvreg(Surv(tempo,status)~1,dist='gengamma')
+##ajust4$loglik
+2*(ajust4$loglik-cbind(exponencial$loglik[2],weibull$loglik[2],lognormal$loglik[2]))
+```
+
+```{r}
+lognormal<-survreg(Surv(tempo,status)~idadeclass+gptumor+desnut+comorbi+leucopenia,dist='lognorm',data=dados)
+
+summary(lognormal)
 ```
 ```{r}
- ajust4<-flexsurvreg(Surv(tempo,status)~1,dist='gengamma')
- ajust4
- ajust4$loglik
- 2*(ajust4$loglik-cbind(exponencial$loglik[2],weibull$loglik[2],lognormal$loglik[2]))
+ sigma<-lognormal$scale
+ res<-(log(dados$tempo)-lognormal$linear.predictors)/sigma                   # resíduos padronizados
+ resid<-exp(res)                                # exponencial dos resíduos padronizados
+ ekm<- survfit(Surv(resid,status)~1,data=dados)
+ resid<-ekm$time
+ sln<-pnorm(-log(resid))
+ par(mfrow=c(1,2))
+ 
+ plot(ekm,conf.int=F,mark.time=F,xlab="Resíduos (ei*)",ylab="Sobrevivência estimada",pch=16)
+ lines(resid,sln,lty=2)
+ legend(1.3,0.8,lty=c(1,2),c("Kaplan-Meier","Log-normal padrão"),cex=0.8,bty="n")
+ 
+ plot(ekm$surv,sln, xlab="S(ei*): Kaplan-Meier",ylab="S(ei*): Log-normal padrão",pch=16)
+ lines(c(0,1), c(0,1), type="l", lty=1,lwd=2,col="red")
 ```
+
 
