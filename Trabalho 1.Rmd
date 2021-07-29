@@ -50,6 +50,7 @@ dados$idadeclass  <- as.factor(dados$idadeclass)
 (table(dados$desnut))
 (table(dados$comorbi))
 (table(dados$leucopenia))
+(table(dados$idadeclass))
 ```
 
 
@@ -67,9 +68,33 @@ tipo = dados$gptumor
 sexo = dados$sexo
 
 km.dados = survfit(Surv(tempo, status)~1, data = dados)
-summary(km.dados)
+# summary(km.dados)
 plot(km.dados, las = 1, col = c(1,2,3))
 ```
+
+```{r}
+par(mfrow=c(2,2))
+km.dados.tipo = survfit(Surv(tempo, status)~ sexo , data = dados)
+# summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2), main="Kaplan-Meier Sexo")
+legend(90,1.1,lty =c(1,2),c("Feminino","Masculino"),lwd=1, bty="n")
+
+km.dados.tipo = survfit(Surv(tempo, status)~ desnut  , data = dados)
+# summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2),main="Kaplan-Meier Desnutrição")
+legend(90,1.1,lty =c(1,2),c("Não","Sim"),lwd=1, bty="n")
+
+km.dados.tipo = survfit(Surv(tempo, status)~ comorbi  , data = dados)
+# summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2),main="Kaplan-Meier Comorbidade")
+legend(90,1.1,lty =c(1,2),c("Não","Sim"),lwd=1, bty="n")
+
+km.dados.tipo = survfit(Surv(tempo, status)~ leucopenia   , data = dados)
+# summary(km.dados.tipo)
+plot(km.dados.tipo, lty = c(1,2), main="Kaplan-Meier Leucopenia")
+legend(90,1.1,lty =c(1,2),c("Não","Sim"),lwd=1, bty="n")
+```
+
 
 ```{r}
 km.dados.tipo = survfit(Surv(tempo, status)~ sexo , data = dados)
@@ -102,7 +127,7 @@ legend(120,0.9,lty =c(1,2),c("Não","Sim"),lwd=1, bty="n")
 ```{r}
 km.dados.tipo = survfit(Surv(tempo, status)~ idadeclass  , data = dados)
 # summary(km.dados.tipo)
-plot(km.dados.tipo, lty = c(1,2,3,4))
+plot(km.dados.tipo, lty = c(1,2,3,4),main="Kaplan-Meier Idades Categorizadas")
 legend(120,1,lty =c(1,2,3,4),
        c(">60","16-20","21-40","41-60"),lwd=1, bty="n")
 ```
@@ -147,8 +172,6 @@ presença de leucopenia
 lr.dados = survdiff(Surv(tempo, status)~leucopenia, data = dados)
 lr.dados
 ```
-
-
 
 
 
