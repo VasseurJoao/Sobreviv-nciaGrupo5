@@ -31,17 +31,6 @@ if(dados$idade[i]>40 && dados$idade[i]<61){
 if(dados$idade[i]>60){
   dados$idadeclass[i] <- ">60"
 }
-     if(dados$sexo[i]=="Fem"){dados$sexo[i] <- 0}
-  else{dados$sexo[i] <- 1}
-if(dados$gptumor[i]=="Loco"){  dados$gptumor[i] <- 0}
-  if(dados$gptumor[i]=="Mtx"){  dados$gptumor[i] <- 1}
-  else{dados$gptumor[i] <- 2}
-if(dados$desnut[i]=="y"){dados$desnut[i] <- 1}
-  else{dados$desnut[i] <- 0}
-if(dados$comorbi[i]=="y"){dados$comorbi[i] <- 1}
-  else{dados$comorbi[i] <- 0}
-if(dados$leucopenia[i]=="y"){dados$leucopenia[i] <- 1}
-  else{dados$leucopenia[i] <- 0}
 }
 
 dados$sexo <- as.factor(dados$sexo)
